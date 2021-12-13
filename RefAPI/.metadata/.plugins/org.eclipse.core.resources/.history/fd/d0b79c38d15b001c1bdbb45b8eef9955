@@ -1,0 +1,90 @@
+package com.proretention.refapi.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.proretention.refapi.io.entity.UserEntity;
+import com.proretention.refapi.repository.UserRepository;
+import com.proretention.refapi.service.UserService;
+import com.proretention.refapi.ui.shared.Utils;
+import com.proretention.refapi.ui.shared.dto.UserDto;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+	@Autowired
+	Utils utils;
+	
+	@Autowired
+	UserRepository userRepository;
+
+	
+	@Override
+	public UserDto createUser(UserDto user) {
+		
+		UserEntity userEntity = new UserEntity();
+		BeanUtils.copyProperties(user, userEntity);
+		
+		//String publicUserId = "abc";
+		//userEntity.setUserId(publicUserId);
+		
+		
+		//userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+		userEntity.setEncryptedPassword("testpwd");
+		
+		UserEntity storedUserDetails = userRepository.save(userEntity);
+		
+		UserDto retVal = new UserDto();
+		BeanUtils.copyProperties(storedUserDetails, retVal);
+		
+		return retVal;
+	}
+
+	@Override
+	public UserDto getUserByUserId(String userId) {
+		
+		UserDto retVal = new UserDto();
+		
+		UserEntity userEntity = userRepository.findByUserId(userId);
+		BeanUtils.copyProperties(userEntity, retVal);
+		
+		
+		// TODO Auto-generated method stub
+		return retVal;
+	}
+
+	@Override
+	public UserDto updateUser(String userId, UserDto userDto) {
+
+		UserDto retVal = new UserDto();
+		
+		UserEntity userEntity = userRepository.findByUserId(userId);
+		userEntity.setFirstName(userDto.getFirstName());
+		userEntity.setLastName(userDto.getLastName());
+		userEntity.setEmail(userDto.getEmail());
+		
+		UserEntity updatedUserDetail = userRepository.save(userEntity);
+		BeanUtils.copyProperties(updatedUserDetail, retVal);
+		
+		return retVal;
+	}
+
+	@Override
+	public void deleteUser(String userId) {
+		
+		UserEntity userEntity = userRepository.findByUserId(userId);
+		userRepository.delete(userEntity);
+	}
+
+	@Override
+	public List<UserDto> getUsers(int page, int limit) {
+		List<UserDto> retVal = new ArrayList<>();
+		
+		
+		return retVal;
+	}
+
+}

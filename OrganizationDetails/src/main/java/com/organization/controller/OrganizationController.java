@@ -1,5 +1,6 @@
 package com.organization.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -11,13 +12,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.organization.entity.OrganizationDetails;
 import com.organization.request.model.OrganizationDetailsRequestModel;
 import com.organization.response.OrganizationDetailsResponseModel;
 import com.organization.service.OrganizationService;
-import com.organization.serviceimplementation.OrganizaitonServiceImp;
 import com.organization.shared.dto.OrganizationDetailsDto;
+
+import io.swagger.annotations.ApiOperation;
+import springfox.documentation.service.Contact;
 
 
 
@@ -40,30 +45,54 @@ public class OrganizationController {
 		BeanUtils.copyProperties(createdUser, res);
 		
 		return res;
-		
+
 	}
-	
 	@GetMapping("/{id}")
-	public OrganizationDetails getByOrganizationId(@PathVariable("id") long organizationId)
+	public OrganizationDetailsResponseModel getByOrganizationId(@PathVariable("id") String organizationKey)
 	{
-		return organizationService.getByOrganizationId(organizationId);
+		OrganizationDetailsResponseModel orgResModel=new OrganizationDetailsResponseModel();
+		OrganizationDetailsDto orgDetailsDto=organizationService.getByOrganizationKey(organizationKey);
+		BeanUtils.copyProperties(orgDetailsDto,orgResModel);
+		return orgResModel;
 	}
 	
 	@GetMapping()
-	public List<OrganizationDetails> getAllOrganization()
+	public List<OrganizationDetailsResponseModel> getAllOrganization(@RequestParam(value="page",defaultValue="1")int page,
+			@RequestParam(value="limit",defaultValue="25")int limit)
 	{
-		return organizationService.getAllOrganization();
+		List<OrganizationDetailsResponseModel> orgDetailsResMod=new ArrayList<>();
+		List<OrganizationDetailsDto> orgDetailsDto=organizationService.getAllOrganization(page,limit);
+
+		for(OrganizationDetailsDto  orgDto : orgDetailsDto)
+		{
+			OrganizationDetailsResponseModel orgDetailsRes=new OrganizationDetailsResponseModel();
+			BeanUtils.copyProperties(orgDto, orgDetailsRes);
+			orgDetailsResMod.add(orgDetailsRes);
+		}
+		
+		return orgDetailsResMod;
 	}
 	
-	@PutMapping()
-	public  OrganizationDetails  updateOrganizationById(@RequestBody OrganizationDetails organization)
+	@PutMapping("{id}")
+	public  OrganizationDetailsResponseModel  updateOrganizationById(@PathVariable("id")String organizationKey,
+			@RequestBody OrganizationDetailsRequestModel organization)
 	{
-		return organizationService.updateOrganizaionById(organization);
+		OrganizationDetailsResponseModel orgResModel=new OrganizationDetailsResponseModel();
+		OrganizationDetailsDto orgDetails=new OrganizationDetailsDto();
+		BeanUtils.copyProperties(organization,orgDetails);
+		OrganizationDetailsDto update=organizationService.
+				updateByOrganizaionKey(organizationKey, orgDetails);
+		BeanUtils.copyProperties(update,orgResModel);
+				return orgResModel;
 	}
 	
 	@DeleteMapping("/{id}")
-	public String deleteOrganizationById(@PathVariable("id") long organizationId)
+	public  OperationStatusModel deleteByOrganizationKey(@PathVariable("id") String organizationKey)
 	{
-		return organizationService.deleteOrganizationById(organizationId);
+		OperationStatusModel opStatusModel=new OperationStatusModel();
+		opStatusModel.setOperationName(RequestOperationName.DELETE.name());
+		organizationService.deleteByOrganizationKey(organizationKey);
+		opStatusModel.setOperationResult(RequestOperationStatus.Success.name());
+		return  opStatusModel;
 	}
 }

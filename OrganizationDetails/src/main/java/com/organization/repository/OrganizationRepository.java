@@ -1,5 +1,7 @@
 package com.organization.repository;
 
+import java.util.function.IntPredicate;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,8 +12,15 @@ import com.organization.response.OrganizationDetailsResponseModel;
 @Repository
 public interface OrganizationRepository extends JpaRepository<OrganizationDetails,Long> {
 
-	OrganizationDetails getByOrganizationId(long organizationId);
+	OrganizationDetails findByOrganizationKey(String organizationKey);
 
-	OrganizationDetailsResponseModel save(OrganizationDetailsRequestModel organization);
+	OrganizationDetails deleteByOrganizationKey(String organizationKey);
 
+	Object existsByOrganizationId(String string);
+
+	void existsByOrganizationKey(String string);
+
+
+
+	
 }

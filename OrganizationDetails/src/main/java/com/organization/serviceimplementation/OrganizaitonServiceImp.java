@@ -1,9 +1,13 @@
 package com.organization.serviceimplementation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.organization.entity.OrganizationDetails;
@@ -21,47 +25,77 @@ public class OrganizaitonServiceImp implements OrganizationService {
 	public OrganizationDetailsDto createOrganization(OrganizationDetailsDto orgdto) {
 		
 		OrganizationDetails orgdetails = new OrganizationDetails();
-		BeanUtils.copyProperties(orgdto, orgdetails);
-		OrganizationDetails storedUserDetails = organizationRepository.save(orgdetails);
-		
-		OrganizationDetailsDto retVal = new OrganizationDetailsDto();
-		BeanUtils.copyProperties(storedUserDetails, retVal);
-		
-		return retVal;
+		BeanUtils.copyProperties(orgdto,orgdetails);
+		String organikey="user"+orgdetails.getState();
+		orgdetails.setOrganizationKey(organikey);
+		OrganizationDetails orgStored=organizationRepository.save(orgdetails);
+		OrganizationDetailsDto orgDto=new OrganizationDetailsDto();
+		BeanUtils.copyProperties(orgStored, orgDto);
+	
+		return orgDto;
 	
 }
 
-	public OrganizationDetails getByOrganizationId(long organizationId) {
-		return organizationRepository.getByOrganizationId(organizationId);
+	public OrganizationDetailsDto getByOrganizationKey(String organizationKey) {
+		OrganizationDetailsDto orgDetailsDto=new OrganizationDetailsDto();
+		OrganizationDetails organizationDetails=
+				organizationRepository.findByOrganizationKey(organizationKey);
+		BeanUtils.copyProperties(organizationDetails,orgDetailsDto );
+		return orgDetailsDto;
 	}
 	
-	public List<OrganizationDetails> getAllOrganization() {
 
-		return organizationRepository.findAll();
+	public  void deleteByOrganizationKey(String organizationKey) {
+		OrganizationDetails orgDetails=organizationRepository.findByOrganizationKey(organizationKey);
+		organizationRepository.delete(orgDetails);
 	}
 
-public OrganizationDetails updateOrganizaionById(OrganizationDetails organization) {
-		OrganizationDetails existingOrganization = organizationRepository.getByOrganizationId(organization.getOrganizationId());
-		existingOrganization.setOrganizationKey(organization.getOrganizationKey());
-		existingOrganization.setUserKey(organization.getUserKey());
-		existingOrganization.setAddress(organization.getAddress());
-		existingOrganization.setCountry(organization.getCountry());
-		existingOrganization.setCity(organization.getCity());
-		existingOrganization.setState(organization.getState());
-		existingOrganization.setZipCode(organization.getZipCode());
-		existingOrganization.setLocationUrl(organization.getLocationUrl());
-		existingOrganization.setWebsiteUrl(organization.getWebsiteUrl());
-		existingOrganization.setInsdustry(organization.getInsdustry());
-		existingOrganization.setBussinessType(organization.getBussinessType());
-		existingOrganization.setTaxId(organization.getTaxId());
-		existingOrganization.setCompanyId(organization.getCompanyId());
-		existingOrganization.setAboutUs(organization.getAboutUs());
-		return organizationRepository.save(existingOrganization);
+	@Override
+	public OrganizationDetailsDto updateByOrganizaionKey(String organizationKey, OrganizationDetailsDto orgDetails) {
+	
+		OrganizationDetailsDto orgDetailsDto=new OrganizationDetailsDto();
+		OrganizationDetails existingOrganization = organizationRepository.findByOrganizationKey(organizationKey);
+		existingOrganization.setUserKey(orgDetails.getUserKey());
+		existingOrganization.setAddress(orgDetails.getAddress());
+		existingOrganization.setCountry(orgDetails.getCountry());
+		existingOrganization.setCity(orgDetails.getCity());
+		existingOrganization.setState(orgDetails.getState());
+		existingOrganization.setZipCode(orgDetails.getZipCode());
+		existingOrganization.setLocationUrl(orgDetails.getLocationUrl());
+		existingOrganization.setWebsiteUrl(orgDetails.getWebsiteUrl());
+		existingOrganization.setInsdustry(orgDetails.getInsdustry());
+		existingOrganization.setBussinessType(orgDetails.getBussinessType());
+		existingOrganization.setTaxId(orgDetails.getTaxId());
+		existingOrganization.setCompanyId(orgDetails.getCompanyId());
+		existingOrganization.setAboutUs(orgDetails.getAboutUs());
+		OrganizationDetails updateDetails=organizationRepository.save(existingOrganization);
+		BeanUtils.copyProperties( updateDetails,orgDetailsDto);
+		return orgDetailsDto;
+
 	}
 
-	public String deleteOrganizationById(long organizationId) {
-		organizationRepository.deleteById(organizationId);
-		return organizationId + "this id is deleted Successfully";
+	@Override
+	public List<OrganizationDetailsDto> getAllOrganization(int page, int limit) {
+		
+	
+			List<OrganizationDetailsDto> orgResponse=new ArrayList<>();
+			if(page>0)
+			{
+				page=page-1;
+			}
+			Pageable pageRequest=PageRequest.of(page, limit);
+			
+			Page<OrganizationDetails> orgPage=organizationRepository.findAll(pageRequest);
+			List<OrganizationDetails> organization=orgPage.getContent();
+			for(OrganizationDetails orgDetails:organization)
+			{
+				OrganizationDetailsDto orgDto=new OrganizationDetailsDto();
+				BeanUtils.copyProperties(orgDetails, orgDto);
+				orgResponse.add(orgDto);
+			}
+			
+			return orgResponse;
 	}
 
+	
 }

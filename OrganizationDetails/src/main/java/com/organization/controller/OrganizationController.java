@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,14 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.organization.entity.OrganizationDetails;
+
 import com.organization.request.model.OrganizationDetailsRequestModel;
 import com.organization.response.OrganizationDetailsResponseModel;
 import com.organization.service.OrganizationService;
 import com.organization.shared.dto.OrganizationDetailsDto;
 
-import io.swagger.annotations.ApiOperation;
-import springfox.documentation.service.Contact;
 
 
 
@@ -32,20 +32,20 @@ public class OrganizationController {
 
 	@Autowired
 	private OrganizationService organizationService;
-
+//OrganizationDetailsResponseModel
 	@PostMapping()
 	public OrganizationDetailsResponseModel saveOrganizationDetails(@RequestBody OrganizationDetailsRequestModel organization)
 	{
-		OrganizationDetailsResponseModel res=new OrganizationDetailsResponseModel();
+	
 		
-		OrganizationDetailsDto orgdto=new OrganizationDetailsDto();
-		
-		BeanUtils.copyProperties(organization, orgdto);
-		OrganizationDetailsDto createdUser = organizationService.createOrganization(orgdto);
-		BeanUtils.copyProperties(createdUser, res);
-		
-		return res;
-
+			OrganizationDetailsResponseModel res=new OrganizationDetailsResponseModel();
+			
+			OrganizationDetailsDto orgdto=new OrganizationDetailsDto();
+			
+			BeanUtils.copyProperties(organization, orgdto);
+			OrganizationDetailsDto createdUser = organizationService.createOrganization(orgdto);
+			BeanUtils.copyProperties(createdUser, res);
+			return res;
 	}
 	@GetMapping("/{id}")
 	public OrganizationDetailsResponseModel getByOrganizationId(@PathVariable("id") String organizationKey)
